@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Customer } from '@/types';
 import { CustomerListItem } from './CustomerListItem';
 
@@ -8,8 +8,16 @@ interface CustomerListProps {
   onAddRecord?: (customer: Customer) => void;
 }
 
+const DEFAULT_PAGE_SIZE = 20; // 默认显示数量
+
 export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [displayCount, setDisplayCount] = useState(DEFAULT_PAGE_SIZE);
+
+  // 当客户列表变化时，重置显示数量
+  useEffect(() => {
+    setDisplayCount(DEFAULT_PAGE_SIZE);
+  }, [customers]);
 
   if (customers.length === 0) {
     return (
@@ -53,6 +61,17 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  const handleShowMore = () => {
+    setDisplayCount((prev) => prev + DEFAULT_PAGE_SIZE);
+  };
+
+  const handleShowAll = () => {
+    setDisplayCount(sortedCustomers.length);
+  };
+
+  const displayedCustomers = sortedCustomers.slice(0, displayCount);
+  const hasMore = displayCount < sortedCustomers.length;
+
   return (
     <div className="px-4 pb-8">
       <button
@@ -69,8 +88,13 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
           </svg>
         </div>
       </button>
+
+      <div className="mb-2 text-xs text-slate-400">
+        显示前 {displayedCustomers.length} 位，共 {sortedCustomers.length} 位
+      </div>
+
       <div className="space-y-3">
-        {sortedCustomers.map((customer, index) => (
+        {displayedCustomers.map((customer, index) => (
           <CustomerListItem
             key={customer.id}
             customer={customer}
@@ -80,6 +104,25 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
           />
         ))}
       </div>
+
+      {hasMore && (
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={handleShowMore}
+            className="px-6 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-colors"
+          >
+            查看更多（再加载 {Math.min(DEFAULT_PAGE_SIZE, sortedCustomers.length - displayCount)} 位）
+          </button>
+          {sortedCustomers.length - displayCount > DEFAULT_PAGE_SIZE && (
+            <button
+              onClick={handleShowAll}
+              className="ml-2 px-4 py-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+            >
+              显示全部
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
