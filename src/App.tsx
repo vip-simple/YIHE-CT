@@ -30,6 +30,7 @@ function App() {
       <ApiPathHandler>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/api/*" element={null} />
           <Route
             path="/"
             element={
