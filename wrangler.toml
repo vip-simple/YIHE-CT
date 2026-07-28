@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "yihe-db"
-database_id = "local"
+database_id = "744f9dba-2421-4087-b29b-d5d7a585600d"
