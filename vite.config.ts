@@ -11,5 +11,11 @@ export default defineConfig({
   },
   server: {
     port: 5176,
+    proxy: {
+      '/api': {
+        target: 'https://yihe-ct.pages.dev',
+        changeOrigin: true,
+      },
+    },
   },
 })

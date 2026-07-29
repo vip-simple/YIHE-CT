@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Customer } from '@/types';
 import { CustomerListItem } from './CustomerListItem';
+import { CustomerTable } from './CustomerTable';
 
 interface CustomerListProps {
   customers: Customer[];
@@ -13,6 +14,7 @@ const DEFAULT_PAGE_SIZE = 20; // 默认显示数量
 export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [displayCount, setDisplayCount] = useState(DEFAULT_PAGE_SIZE);
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
 
   // 当客户列表变化时，重置显示数量
   useEffect(() => {
@@ -73,52 +75,63 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
   const hasMore = displayCount < sortedCustomers.length;
 
   return (
-    <div className="px-4 pb-8">
-      <button
-        onClick={toggleSort}
-        className="w-full flex items-center justify-between mb-3 py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-      >
-        <span>按姓名排序</span>
-        <div className="flex items-center gap-1">
-          <svg className={`w-4 h-4 ${sortOrder === 'asc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="px-2 pb-2">
+      <div className="flex items-center justify-between mb-1 py-0.5">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-slate-500">显示 {displayedCustomers.length}/{sortedCustomers.length} 位</span>
+          <button
+            onClick={() => setViewMode(viewMode === 'card' ? 'table' : 'card')}
+            className="text-[10px] text-blue-600 hover:text-blue-800"
+          >
+            {viewMode === 'card' ? '表格' : '卡片'}
+          </button>
+        </div>
+        <button
+          onClick={toggleSort}
+          className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <span>排序</span>
+          <svg className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
           </svg>
-          <svg className={`w-4 h-4 ${sortOrder === 'desc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
+        </button>
+      </div>
+
+      {viewMode === 'card' ? (
+        <div className="space-y-1.5">
+          {displayedCustomers.map((customer, index) => (
+            <CustomerListItem
+              key={customer.id}
+              customer={customer}
+              index={index}
+              onEdit={onEdit}
+              onAddRecord={onAddRecord}
+            />
+          ))}
         </div>
-      </button>
-
-      <div className="mb-2 text-xs text-slate-400">
-        显示前 {displayedCustomers.length} 位，共 {sortedCustomers.length} 位
-      </div>
-
-      <div className="space-y-3">
-        {displayedCustomers.map((customer, index) => (
-          <CustomerListItem
-            key={customer.id}
-            customer={customer}
-            index={index}
-            onEdit={onEdit}
-            onAddRecord={onAddRecord}
-          />
-        ))}
-      </div>
+      ) : (
+        <CustomerTable
+          customers={displayedCustomers}
+        />
+      )}
 
       {hasMore && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-2 flex justify-center">
           <button
             onClick={handleShowMore}
-            className="px-6 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-colors"
+            className="px-3 py-1 bg-white border border-slate-200 rounded text-[10px] text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-colors"
           >
-            查看更多（再加载 {Math.min(DEFAULT_PAGE_SIZE, sortedCustomers.length - displayCount)} 位）
+            查看更多 +{Math.min(DEFAULT_PAGE_SIZE, sortedCustomers.length - displayCount)}
           </button>
           {sortedCustomers.length - displayCount > DEFAULT_PAGE_SIZE && (
             <button
               onClick={handleShowAll}
-              className="ml-2 px-4 py-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+              className="ml-2 px-2 py-1 text-[10px] text-slate-500 hover:text-blue-600 transition-colors"
             >
-              显示全部
+              全部
             </button>
           )}
         </div>

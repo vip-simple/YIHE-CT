@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Header } from '@/components/Header';
 import { FilterBar } from '@/components/FilterBar';
 import { CustomerList } from '@/components/CustomerList';
 import { CustomerForm } from '@/components/CustomerForm';
@@ -20,7 +19,7 @@ function loadInitialFilter(): FilterOptions {
     searchName: '',
     selectedStatuses: [],
     dateRange: getThisWeekRange(),
-    enableDateFilter: true,
+    enableDateFilter: false, // 默认不启用日期筛选，显示所有客户
     hasAttentionItems: false,
     showOnlyWithAttention: false,
   };
@@ -155,16 +154,15 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header title="YIHE CT- List" />
       <FilterBar filter={filter} onFilterChange={setFilter} statuses={statuses} />
-      <div className="px-4 py-3 flex items-center justify-between text-sm text-slate-500">
-        <span>共 <span className="font-semibold text-slate-700">{filteredCustomers.length}</span> 位客户</span>
-        <div className="flex items-center gap-3">
+      <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-500 bg-white border-b border-slate-100">
+        <span>共 <span className="font-semibold text-slate-700">{filteredCustomers.length}</span> 位</span>
+        <div className="flex items-center gap-2">
           <button
             onClick={handleAdd}
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
-            + 新增客户
+            +新增
           </button>
           <span className="text-slate-300">|</span>
           <button
@@ -172,7 +170,7 @@ export function Home() {
             disabled={loading || customers.length === 0}
             className="text-blue-600 hover:text-blue-800 disabled:text-slate-300 font-medium"
           >
-            导出 Excel
+            导出
           </button>
           <span className="text-slate-300">|</span>
           <button
@@ -180,7 +178,7 @@ export function Home() {
             disabled={importing}
             className="text-blue-600 hover:text-blue-800 disabled:text-slate-300 font-medium"
           >
-            {importing ? '导入中...' : '导入 Excel'}
+            {importing ? '导入中' : '导入'}
           </button>
           <input
             ref={fileInputRef}
@@ -192,13 +190,10 @@ export function Home() {
         </div>
       </div>
       {importMsg && (
-        <div className="px-4 py-2 mx-4 mb-2 bg-blue-50 text-blue-700 text-sm rounded-lg">
+        <div className="px-2 py-0.5 mx-2 mb-0.5 bg-blue-50 text-blue-700 text-[10px] rounded">
           {importMsg}
         </div>
       )}
-      <div className="px-4 pb-2 text-xs text-slate-400">
-        按姓名 A-Z 排序
-      </div>
       {loading ? (
         <div className="flex justify-center items-center h-40">
           <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

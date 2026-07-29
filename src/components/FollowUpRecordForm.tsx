@@ -60,35 +60,35 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center">
       <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] flex flex-col">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h3 className="font-semibold text-slate-900">新增跟进记录</h3>
+        <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <h3 className="font-semibold text-xs text-slate-900">新增跟进记录</h3>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1"
+            className="text-slate-400 hover:text-slate-600 p-0.5"
             aria-label="关闭"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-          <div className="bg-slate-50 rounded-xl p-3 space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-sm">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+          <div className="bg-slate-50 rounded-lg p-2 space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs">
                 {customer.name.charAt(0)}
               </span>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">{customer.name}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-semibold text-slate-900 text-xs">{customer.name}</p>
+                <p className="text-[10px] text-slate-500">
                   #{customer.customerNumber} · {customer.followUpStatus}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <Field label="跟进时间 *">
               <input
                 type="date"
@@ -112,7 +112,7 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
               value={form.followUpContent || ''}
               onChange={(e) => handleChange('followUpContent', e.target.value)}
               className="input"
-              rows={5}
+              rows={4}
               placeholder="请输入本次跟进内容"
               autoFocus
             />
@@ -123,7 +123,7 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
               value={form.nextFollowUpContent || ''}
               onChange={(e) => handleChange('nextFollowUpContent', e.target.value)}
               className="input"
-              rows={3}
+              rows={2}
               placeholder="请输入下次跟进计划"
             />
           </Field>
@@ -139,15 +139,15 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
           </Field>
 
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm py-2 px-3 rounded-lg">{error}</div>
+            <div className="bg-red-50 text-red-600 text-[10px] py-1 px-2 rounded">{error}</div>
           )}
         </form>
 
-        <div className="px-5 py-3 border-t border-slate-100 flex gap-3 shrink-0">
+        <div className="px-3 py-2 border-t border-slate-100 flex gap-2 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-slate-50"
+            className="flex-1 py-1.5 rounded border border-slate-200 text-slate-600 text-[10px] font-medium hover:bg-slate-50"
           >
             取消
           </button>
@@ -155,7 +155,7 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
             type="submit"
             onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:bg-blue-300"
+            className="flex-1 py-1.5 rounded bg-blue-600 text-white text-[10px] font-medium hover:bg-blue-700 disabled:bg-blue-300"
           >
             {saving ? '保存中...' : '保存'}
           </button>
@@ -168,7 +168,7 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
 function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
   return (
     <div className={full ? 'col-span-2' : ''}>
-      <label className="block text-xs text-slate-500 mb-1">{label}</label>
+      <label className="block text-[10px] text-slate-500 mb-0.5">{label}</label>
       {children}
     </div>
   );

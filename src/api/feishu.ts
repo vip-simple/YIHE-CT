@@ -381,13 +381,14 @@ export async function uploadToD1(customers: Customer[], records: FollowUpRecord[
 
 export function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    '待跟进': 'bg-orange-100 text-orange-800',
+    //'待跟进': 'bg-orange-100 text-orange-800',
     '跟进中': 'bg-blue-100 text-blue-800',
-    '已完成': 'bg-green-100 text-green-800',
-    '延期': 'bg-red-100 text-red-800',
+   // '已完成': 'bg-green-100 text-green-800',
+    //'延期': 'bg-red-100 text-red-800',
     '暂时先不跟': 'bg-gray-100 text-gray-600',
+    '暂时不跟': 'bg-gray-100 text-gray-600',
     '已放弃': 'bg-red-50 text-red-700',
-    '重点跟踪': 'bg-amber-100 text-amber-800',
+    '重点跟踪': 'bg-orange-100 text-orange-800',
     '已约': 'bg-purple-100 text-purple-800',
   };
   return colors[status] || 'bg-gray-100 text-gray-800';
@@ -397,7 +398,7 @@ export function getCustomerStatusColor(status: string): string {
   const colors: Record<string, string> = {
     '潜在': 'bg-yellow-100 text-yellow-800',
     '意向': 'bg-purple-100 text-purple-800',
-    '待成交': 'bg-amber-100 text-amber-800',
+   // '待成交': 'bg-amber-100 text-amber-800',
     '成交': 'bg-green-100 text-green-800',
   };
   return colors[status] || 'bg-gray-100 text-gray-800';
