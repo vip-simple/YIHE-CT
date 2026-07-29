@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Customer } from '@/types';
-import { getStatusColor, getCustomerStatusColor, formatMoney, formatDate } from '@/api/feishu';
+import { getStatusColor, getCustomerStatusColor, formatDate } from '@/api/feishu';
 
 interface CustomerListItemProps {
   customer: Customer;
