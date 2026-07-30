@@ -8,9 +8,10 @@ interface CustomerListItemProps {
   index: number;
   onEdit?: (customer: Customer) => void;
   onAddRecord?: (customer: Customer) => void;
+  onCustomerClick?: (customer: Customer) => void;
 }
 
-export function CustomerListItem({ customer, index, onEdit, onAddRecord }: CustomerListItemProps) {
+export function CustomerListItem({ customer, index, onEdit, onAddRecord, onCustomerClick }: CustomerListItemProps) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -33,7 +34,13 @@ export function CustomerListItem({ customer, index, onEdit, onAddRecord }: Custo
 
   return (
     <div
-      onClick={() => navigate(`/customer/${customer.id}`)}
+      onClick={() => {
+        if (onCustomerClick) {
+          onCustomerClick(customer);
+        } else {
+          navigate(`/customer/${customer.id}`);
+        }
+      }}
       className="bg-white rounded-lg p-2 shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer"
     >
       <div className="flex items-center justify-between mb-1.5">

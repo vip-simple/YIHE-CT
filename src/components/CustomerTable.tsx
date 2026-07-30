@@ -1,16 +1,37 @@
 import type { Customer } from '@/types';
 import { useNavigate } from 'react-router-dom';
-import { getStatusColor, getCustomerStatusColor, formatDate } from '@/api/feishu';
+import { getStatusColor, getCustomerStatusColor } from '@/api/feishu';
+import { QuickFollowUpEdit } from './QuickFollowUpEdit';
+
+// 格式化日期为 月/日 格式
+function formatMonthDay(dateString: string): string {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}/${day}`;
+  } catch {
+    return '-';
+  }
+}
 
 interface CustomerTableProps {
   customers: Customer[];
+  onCustomerClick?: (customer: Customer) => void;
+  onQuickUpdate?: (customerId: string, updates: Partial<Customer>) => void;
 }
 
-export function CustomerTable({ customers }: CustomerTableProps) {
+export function CustomerTable({ customers, onCustomerClick, onQuickUpdate }: CustomerTableProps) {
   const navigate = useNavigate();
 
   const handleCustomerClick = (customer: Customer) => {
-    navigate(`/customer/${customer.id}`);
+    if (onCustomerClick) {
+      onCustomerClick(customer);
+    } else {
+      navigate(`/customer/${customer.id}`);
+    }
   };
 
   return (
@@ -30,17 +51,27 @@ export function CustomerTable({ customers }: CustomerTableProps) {
           {customers.map((customer, index) => (
             <tr
               key={customer.id}
-              onClick={() => handleCustomerClick(customer)}
-              className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer"
+              className="border-b border-slate-100 hover:bg-slate-50"
             >
               <td className="px-1 py-0 text-[8px] text-slate-500 whitespace-nowrap">
                 {index + 1}
               </td>
               <td className="px-1 py-0">
-                <div className="flex flex-col gap-0 max-w-16">
+                <div
+                  onClick={() => handleCustomerClick(customer)}
+                  className="flex flex-col gap-0 max-w-16 cursor-pointer hover:text-blue-600"
+                >
                   <span className="text-xs font-medium text-slate-900 break-words">{customer.name}</span>
                   {customer.customerNumber > 0 && (
-                    <span className="text-[8px] text-slate-500">#{customer.customerNumber}</span>
+                    <span className="text-[8px] text-slate-500">
+                    #{customer.customerNumber}
+                    {customer.expectedInvestmentAmount > 0 && (
+                      <span className="text-green-500"> ${customer.expectedInvestmentAmount}</span>
+                    )}
+                    {customer.expectedInvestmentAmount === 0 && (
+                      <span> -</span>
+                    )}
+                  </span>
                   )}
                 </div>
               </td>
@@ -58,13 +89,17 @@ export function CustomerTable({ customers }: CustomerTableProps) {
               </td>
               <td className="px-1 py-0 text-[10px] text-slate-600">
                 <div className="flex flex-col gap-0">
-                  <div className="text-[8px] text-blue-600">{formatDate(customer.lastFollowUpTime)}</div>
+                  <div className="text-[8px] text-blue-600">{formatMonthDay(customer.lastFollowUpTime)}</div>
                   <div className="text-[10px] leading-tight">{customer.lastFollowUpContent}</div>
                 </div>
               </td>
               <td className="px-1 py-0 text-[10px] text-slate-600">
                 <div className="flex flex-col gap-0">
-                  <div className="text-[8px] text-emerald-600 font-medium">{formatDate(customer.nextFollowUpTime)}</div>
+                  <QuickFollowUpEdit
+                    customerId={customer.id}
+                    currentDate={customer.nextFollowUpTime}
+                    onQuickUpdate={onQuickUpdate}
+                  />
                   <div className="text-[10px] leading-tight">{customer.nextFollowUpContent}</div>
                 </div>
               </td>

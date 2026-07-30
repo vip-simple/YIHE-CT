@@ -97,6 +97,19 @@ export async function updateCustomer(id: string, customer: Partial<Customer>): P
   return { success: true };
 }
 
+// 快速更新下次跟进时间
+export async function updateNextFollowUpTime(id: string, nextFollowUpTime: string): Promise<{ success: boolean; error?: string }> {
+  const response = await fetch(`/api/customers/${id}/next-followup`, {
+    method: 'PATCH',
+    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ nextFollowUpTime }),
+  });
+  checkAuth(response);
+  const data = await response.json();
+  if (!response.ok) return { success: false, error: data.error || '更新失败' };
+  return { success: true };
+}
+
 // 删除客户
 export async function deleteCustomer(id: string): Promise<{ success: boolean; error?: string }> {
   const response = await fetch(`/api/customers/${id}`, {

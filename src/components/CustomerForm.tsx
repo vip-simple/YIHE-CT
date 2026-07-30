@@ -5,7 +5,7 @@ import { createCustomer, updateCustomer, createFollowUpRecord } from '@/api/feis
 interface CustomerFormProps {
   customer?: Customer | null; // 传入则编辑，不传则新增
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (updatedCustomer?: Customer) => void;
 }
 
 const FOLLOW_UP_STATUSES = ['重点跟踪', '已约', '跟进中', '暂时先不跟', '已放弃'];
@@ -76,7 +76,13 @@ export function CustomerForm({ customer, onClose, onSaved }: CustomerFormProps) 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('CustomerForm.handleSubmit called, saving:', saving);
     e.preventDefault();
+    // 防止重复提交
+    if (saving) {
+      console.log('CustomerForm: 已经在保存中，忽略此次调用');
+      return;
+    }
     if (!form.name || !form.name.trim()) {
       setError('客户姓名不能为空');
       return;
@@ -84,14 +90,22 @@ export function CustomerForm({ customer, onClose, onSaved }: CustomerFormProps) 
     setSaving(true);
     setError('');
     try {
+      console.log('CustomerForm: 开始保存, isEdit:', isEdit, 'customer:', customer);
       if (isEdit && customer) {
+        console.log('CustomerForm: 进入编辑分支');
         // 编辑客户
         const res = await updateCustomer(customer.id, form);
         if (!res.success) {
           setError(res.error || '更新失败');
           return;
         }
+        // 返回更新后的客户数据
+        const updatedCustomer = { ...customer, ...form };
+        console.log('CustomerForm: 编辑模式，准备调用 onSaved，参数:', updatedCustomer);
+        onSaved(updatedCustomer);
+        console.log('CustomerForm: 编辑模式，onSaved 调用完成');
       } else {
+        console.log('CustomerForm: 进入新增分支');
         // 新增客户
         const res = await createCustomer(form);
         if (res.error || !res.id) {
@@ -120,8 +134,10 @@ export function CustomerForm({ customer, onClose, onSaved }: CustomerFormProps) 
             console.warn('自动创建跟进记录失败:', recordRes.error);
           }
         }
+        console.log('CustomerForm: 新增模式，准备调用 onSaved，无参数');
+        onSaved();
+        console.log('CustomerForm: 新增模式，onSaved 调用完成');
       }
-      onSaved();
     } catch {
       setError('保存失败，请重试');
     } finally {

@@ -5,7 +5,7 @@ import { createFollowUpRecord } from '@/api/feishu';
 interface FollowUpRecordFormProps {
   customer: Customer;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (updatedCustomer?: Customer) => void;
 }
 
 function getToday(): string {
@@ -49,7 +49,14 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
         setError(res.error);
         return;
       }
-      onSaved();
+      // 返回更新后的客户数据
+      onSaved({
+        ...customer,
+        lastFollowUpTime: form.followUpTime || customer.lastFollowUpTime,
+        lastFollowUpContent: form.followUpContent || customer.lastFollowUpContent,
+        nextFollowUpTime: form.nextFollowUpTime || customer.nextFollowUpTime,
+        nextFollowUpContent: form.nextFollowUpContent || customer.nextFollowUpContent,
+      });
     } catch {
       setError('保存失败，请重试');
     } finally {

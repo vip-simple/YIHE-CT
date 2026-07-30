@@ -3,8 +3,10 @@ import { FilterBar } from '@/components/FilterBar';
 import { CustomerList } from '@/components/CustomerList';
 import { CustomerForm } from '@/components/CustomerForm';
 import { FollowUpRecordForm } from '@/components/FollowUpRecordForm';
+import { CustomerDetailModal } from '@/components/CustomerDetailModal';
 import { fetchCustomers, getThisWeekRange, exportToExcel, importFromExcel, uploadToD1 } from '@/api/feishu';
 import type { Customer, FilterOptions } from '@/types';
+import { clearAllCustomerCache, updateCustomerCache } from '@/hooks/useCustomerCache';
 
 // 筛选条件本地存储 key
 const FILTER_STORAGE_KEY = 'yihe_filter';
@@ -34,6 +36,7 @@ export function Home() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [recordFormOpen, setRecordFormOpen] = useState(false);
   const [recordCustomer, setRecordCustomer] = useState<Customer | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState<FilterOptions>(loadInitialFilter);
 
@@ -46,6 +49,8 @@ export function Home() {
 
   const loadCustomers = async () => {
     setLoading(true);
+    // 清空缓存，因为列表重新加载了
+    clearAllCustomerCache();
     const data = await fetchCustomers();
     setCustomers(data);
     setLoading(false);
@@ -117,6 +122,46 @@ export function Home() {
     setFormOpen(false);
     setEditingCustomer(null);
     await loadCustomers();
+  };
+
+  // 处理客户点击
+  const handleCustomerClick = (customer: Customer) => {
+    setSelectedCustomerId(customer.id);
+  };
+
+  // 关闭详情模态框
+  const handleCloseDetail = () => {
+    setSelectedCustomerId(null);
+  };
+
+  // 快速更新单条客户数据
+  const handleQuickUpdate = (customerId: string, updates: Partial<Customer>) => {
+    setCustomers(prevCustomers =>
+      prevCustomers.map(customer =>
+        customer.id === customerId
+          ? { ...customer, ...updates }
+          : customer
+      )
+    );
+    // 更新缓存中的客户信息
+    updateCustomerCache(customerId, updates);
+  };
+
+  // 详情更新后
+  const handleDetailUpdate = (updatedCustomer?: Customer) => {
+    if (updatedCustomer) {
+      // 只更新列表中的这一条数据，不重新加载整个列表
+      setCustomers(prevCustomers =>
+        prevCustomers.map(customer =>
+          customer.id === updatedCustomer.id
+            ? updatedCustomer
+            : customer
+        )
+      );
+    } else {
+      // 如果没有返回更新的客户信息，则重新加载列表
+      loadCustomers();
+    }
   };
 
   const statuses = ['重点跟踪', '已约', '跟进中', '暂时先不跟', '已放弃'];
@@ -206,6 +251,8 @@ export function Home() {
           customers={filteredCustomers}
           onEdit={handleEdit}
           onAddRecord={handleAddRecord}
+          onCustomerClick={handleCustomerClick}
+          onQuickUpdate={handleQuickUpdate}
         />
       )}
 
@@ -228,6 +275,14 @@ export function Home() {
             setRecordCustomer(null);
           }}
           onSaved={handleRecordSaved}
+        />
+      )}
+
+      {selectedCustomerId && (
+        <CustomerDetailModal
+          customerId={selectedCustomerId}
+          onClose={handleCloseDetail}
+          onUpdate={handleDetailUpdate}
         />
       )}
     </div>

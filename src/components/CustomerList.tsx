@@ -7,11 +7,13 @@ interface CustomerListProps {
   customers: Customer[];
   onEdit?: (customer: Customer) => void;
   onAddRecord?: (customer: Customer) => void;
+  onCustomerClick?: (customer: Customer) => void;
+  onQuickUpdate?: (customerId: string, updates: Partial<Customer>) => void;
 }
 
 const DEFAULT_PAGE_SIZE = 20; // 默认显示数量
 
-export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListProps) {
+export function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuickUpdate }: CustomerListProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [displayCount, setDisplayCount] = useState(DEFAULT_PAGE_SIZE);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
@@ -107,6 +109,7 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
               key={customer.id}
               customer={customer}
               index={index}
+              onCustomerClick={onCustomerClick}
               onEdit={onEdit}
               onAddRecord={onAddRecord}
             />
@@ -115,6 +118,8 @@ export function CustomerList({ customers, onEdit, onAddRecord }: CustomerListPro
       ) : (
         <CustomerTable
           customers={displayedCustomers}
+          onCustomerClick={onCustomerClick}
+          onQuickUpdate={onQuickUpdate}
         />
       )}
 
