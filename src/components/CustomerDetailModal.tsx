@@ -4,7 +4,7 @@ import { fetchCustomer, fetchFollowUpRecords, deleteCustomer, getStatusColor, ge
 import { CustomerForm } from './CustomerForm';
 import { FollowUpRecordForm } from './FollowUpRecordForm';
 import { FollowUpRecordItem } from './FollowUpRecordItem';
-import { getCustomerCache, saveCustomerCache, updateCustomerCache, removeCustomerCache } from '@/hooks/useCustomerCache';
+import { getCustomerCache, saveCustomerCache } from '@/hooks/useCustomerCache';
 
 interface CustomerDetailModalProps {
   customerId: string | null;
