@@ -36,7 +36,7 @@ export function CustomerTable({ customers, onCustomerClick, onQuickUpdate }: Cus
   };
 
   return (
-    <div className="h-[70vh] flex flex-col">
+    <div className="h-[85vh] flex flex-col">
       {/* 固定表头 */}
       <div className="flex-shrink-0">
         <table className="w-full text-sm border-collapse">
@@ -96,13 +96,13 @@ export function CustomerTable({ customers, onCustomerClick, onQuickUpdate }: Cus
                     )}
                   </div>
                 </td>
-                <td className="px-2 py-0 text-[8px] text-slate-600">
+                <td className="px-2 py-0 text-[10px] text-slate-600">
                   <div className="flex flex-col gap-0">
-                    <div className="text-[8px] text-blue-600">{formatMonthDay(customer.lastFollowUpTime)}</div>
-                    <div  onClick={() => handleCustomerClick(customer)} className="text-[8px] leading-tight">{customer.lastFollowUpContent}</div>
+                    <div className="text-[10px] text-blue-600">{formatMonthDay(customer.lastFollowUpTime)}</div>
+                    <div  onClick={() => handleCustomerClick(customer)} className="text-[10px] leading-tight">{customer.lastFollowUpContent}</div>
                   </div>
                 </td>
-                <td className="px-2 py-0 text-[8px] text-slate-600">
+                <td className="px-2 py-0 text-[10px] text-slate-600">
                   <div className="flex flex-col gap-0">
                     <QuickFollowUpEdit
                       customerId={customer.id}
@@ -110,7 +110,7 @@ export function CustomerTable({ customers, onCustomerClick, onQuickUpdate }: Cus
                       onQuickUpdate={onQuickUpdate}
                     />
                     <div
-                      className="text-[8px] leading-tight cursor-pointer hover:text-blue-600 min-h-3"
+                      className="text-[10px] leading-tight cursor-pointer hover:text-blue-600 min-h-3"
                     >
                       {customer.nextFollowUpContent}
                     </div>

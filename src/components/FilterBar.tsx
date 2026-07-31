@@ -31,23 +31,13 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
             type="text"
             value={filter.searchName}
             onChange={(e) => onFilterChange({ ...filter, searchName: e.target.value })}
-            placeholder="搜索姓名或编号"
+            placeholder="搜索姓名、编号、上次跟进内容、下次跟进内容，关注"
             className="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           />
         </div>
       </div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] text-slate-500 font-medium">状态</span>
-        {filter.selectedStatuses.length > 0 && (
-          <button
-            onClick={clearAllStatuses}
-            className="text-[10px] text-blue-500 hover:text-blue-600"
-          >
-            清除
-          </button>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-1 mb-1.5">
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <span className="text-[10px] text-slate-500 font-medium">状态：</span>
         {statuses.map((status) => (
           <button
             key={status}
@@ -61,6 +51,14 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
             {status}
           </button>
         ))}
+        {filter.selectedStatuses.length > 0 && (
+          <button
+            onClick={clearAllStatuses}
+            className="px-2 py-0.5 rounded text-[10px] bg-red-100 text-red-600 hover:bg-red-200"
+          >
+            清除
+          </button>
+        )}
       </div>
       <div className="flex gap-3 mb-1.5">
         <label className="flex items-center gap-1 cursor-pointer">
@@ -90,7 +88,7 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
             onChange={(e) =>
               onFilterChange({ ...filter, dateRange: { ...filter.dateRange, start: e.target.value } })
             }
-            className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-180 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <div className="flex-1">
@@ -100,7 +98,7 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
             onChange={(e) =>
               onFilterChange({ ...filter, dateRange: { ...filter.dateRange, end: e.target.value } })
             }
-            className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-180 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
       </div>

@@ -86,7 +86,7 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
   const hasMore = displayCount < sortedCustomers.length;
 
   return (
-    <div className="h-[70vh] flex flex-col px-2 pb-2">
+    <div className="h-[85vh] flex flex-col px-2 pb-2">
       {/* 头部控制区域 */}
       <div className="flex-shrink-0 flex items-center justify-between mb-1 py-0.5">
         <div className="flex items-center gap-2">

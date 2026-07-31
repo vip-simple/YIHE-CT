@@ -202,7 +202,10 @@ export function Home() {
         const keyword = filter.searchName.toLowerCase();
         const nameMatch = customer.name.toLowerCase().includes(keyword);
         const numberMatch = String(customer.customerNumber).includes(keyword);
-        if (!nameMatch && !numberMatch) {
+        const lastFollowUpMatch = customer.lastFollowUpContent?.toLowerCase().includes(keyword);
+        const attentionMatch = customer.attentionItems?.toLowerCase().includes(keyword);
+        const nextFollowUpMatch = customer.nextFollowUpContent?.toLowerCase().includes(keyword);
+        if (!nameMatch && !numberMatch && !lastFollowUpMatch && !attentionMatch && !nextFollowUpMatch) {
           return false;
         }
       }
