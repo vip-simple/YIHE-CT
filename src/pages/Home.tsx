@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FilterBar } from '@/components/FilterBar';
 import { CustomerList } from '@/components/CustomerList';
 import { CustomerForm } from '@/components/CustomerForm';
@@ -110,45 +110,10 @@ export function Home() {
     setRecordFormOpen(true);
   };
 
-  // 跟进记录保存成功后
-  const handleRecordSaved = async () => {
+  // 跟进记录保存成功后（列表页面的跟进记录表单）
+  const handleRecordSaved = async (updatedCustomer?: Customer) => {
     setRecordFormOpen(false);
     setRecordCustomer(null);
-    await loadCustomers();
-  };
-
-  // 表单保存成功后
-  const handleSaved = async () => {
-    setFormOpen(false);
-    setEditingCustomer(null);
-    await loadCustomers();
-  };
-
-  // 处理客户点击
-  const handleCustomerClick = (customer: Customer) => {
-    setSelectedCustomerId(customer.id);
-  };
-
-  // 关闭详情模态框
-  const handleCloseDetail = () => {
-    setSelectedCustomerId(null);
-  };
-
-  // 快速更新单条客户数据
-  const handleQuickUpdate = (customerId: string, updates: Partial<Customer>) => {
-    setCustomers(prevCustomers =>
-      prevCustomers.map(customer =>
-        customer.id === customerId
-          ? { ...customer, ...updates }
-          : customer
-      )
-    );
-    // 更新缓存中的客户信息
-    updateCustomerCache(customerId, updates);
-  };
-
-  // 详情更新后
-  const handleDetailUpdate = (updatedCustomer?: Customer) => {
     if (updatedCustomer) {
       // 只更新列表中的这一条数据，不重新加载整个列表
       setCustomers(prevCustomers =>
@@ -159,12 +124,77 @@ export function Home() {
         )
       );
     } else {
-      // 如果没有返回更新的客户信息，则重新加载列表
-      loadCustomers();
+      await loadCustomers();
     }
   };
 
-  const statuses = ['重点跟踪', '已约', '跟进中', '暂时先不跟', '已放弃'];
+  // 表单保存成功后（列表页面的客户表单）
+  const handleSaved = async (updatedCustomer?: Customer) => {
+    setFormOpen(false);
+    setEditingCustomer(null);
+    if (updatedCustomer) {
+      // 只更新列表中的这一条数据，不重新加载整个列表
+      setCustomers(prevCustomers =>
+        prevCustomers.map(customer =>
+          customer.id === updatedCustomer.id
+            ? updatedCustomer
+            : customer
+        )
+      );
+    } else {
+      await loadCustomers();
+    }
+  };
+
+  // 处理客户点击
+  const handleCustomerClick = useCallback((customer: Customer) => {
+    // console.log('Home.handleCustomerClick called for:', customer.name, 'id:', customer.id);
+    setSelectedCustomerId(customer.id);
+    // console.log('Home.selectedCustomerId set to:', customer.id);
+  }, []);
+
+  // 关闭详情模态框
+  const handleCloseDetail = () => {
+    setSelectedCustomerId(null);
+  };
+
+  // 快速更新单条客户数据
+  const handleQuickUpdate = useCallback((customerId: string, updates: Partial<Customer>) => {
+    // console.log('handleQuickUpdate called:', customerId, updates);
+    setCustomers(prevCustomers =>
+      prevCustomers.map(customer =>
+        customer.id === customerId
+          ? { ...customer, ...updates }
+          : customer
+      )
+    );
+    // 更新缓存中的客户信息
+    updateCustomerCache(customerId, updates);
+    // console.log('handleQuickUpdate completed');
+  }, []);
+
+  // 详情更新后
+  const handleDetailUpdate = useCallback((updatedCustomer?: Customer) => {
+    // console.log('Home.handleDetailUpdate called, updatedCustomer:', updatedCustomer);
+    if (updatedCustomer) {
+      // 只更新列表中的这一条数据，不重新加载整个列表
+      // console.log('Home: 只更新单条数据，不刷新列表');
+      setCustomers(prevCustomers =>
+        prevCustomers.map(customer =>
+          customer.id === updatedCustomer.id
+            ? updatedCustomer
+            : customer
+        )
+      );
+    } else {
+      // 如果没有返回更新的客户信息，则重新加载列表
+      console.log('Home: 没有updatedCustomer，准备重新加载列表');
+      loadCustomers();
+    }
+    // console.log('Home.handleDetailUpdate completed');
+  }, []);
+
+  const statuses = ['重点跟踪', '已约', '跟进中', '暂时不跟', '已放弃'];
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {

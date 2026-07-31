@@ -40,23 +40,30 @@ export function FollowUpRecordForm({ customer, onClose, onSaved }: FollowUpRecor
     setSaving(true);
     setError('');
     try {
+      // console.log('FollowUpRecordForm: 准备创建跟进记录，表单数据:', form);
       const res = await createFollowUpRecord(customer.id, {
         ...form,
         customerId: customer.id,
         customerNumber: customer.customerNumber,
       });
+      // console.log('FollowUpRecordForm: 跟进记录创建结果:', res);
+
       if (res.error) {
         setError(res.error);
         return;
       }
+
       // 返回更新后的客户数据
-      onSaved({
+      const updatedCustomer = {
         ...customer,
         lastFollowUpTime: form.followUpTime || customer.lastFollowUpTime,
         lastFollowUpContent: form.followUpContent || customer.lastFollowUpContent,
         nextFollowUpTime: form.nextFollowUpTime || customer.nextFollowUpTime,
         nextFollowUpContent: form.nextFollowUpContent || customer.nextFollowUpContent,
-      });
+      };
+      // console.log('FollowUpRecordForm: 准备调用 onSaved，参数:', updatedCustomer);
+      onSaved(updatedCustomer);
+      // console.log('FollowUpRecordForm: onSaved 调用完成');
     } catch {
       setError('保存失败，请重试');
     } finally {

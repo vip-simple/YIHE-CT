@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import type { Customer } from '@/types';
 import { CustomerListItem } from './CustomerListItem';
 import { CustomerTable } from './CustomerTable';
@@ -13,15 +13,24 @@ interface CustomerListProps {
 
 const DEFAULT_PAGE_SIZE = 20; // 默认显示数量
 
-export function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuickUpdate }: CustomerListProps) {
+function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuickUpdate }: CustomerListProps) {
+  // console.log('CustomerList rendered, onCustomerClick:', typeof onCustomerClick);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [displayCount, setDisplayCount] = useState(DEFAULT_PAGE_SIZE);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
 
-  // 当客户列表变化时，重置显示数量
+  // 当客户列表长度发生重大变化时（如重新加载），才重置显示数量
+  const prevLengthRef = useRef<number>(0);
   useEffect(() => {
-    setDisplayCount(DEFAULT_PAGE_SIZE);
-  }, [customers]);
+    const currentLength = customers.length;
+    const prevLength = prevLengthRef.current;
+
+    // 只有当列表长度完全不同时（比如从0到有数据，或数据量完全变化），才重置
+    if (prevLength === 0 || Math.abs(currentLength - prevLength) > 10) {
+      setDisplayCount(DEFAULT_PAGE_SIZE);
+    }
+    prevLengthRef.current = currentLength;
+  }, [customers.length]);
 
   if (customers.length === 0) {
     return (
@@ -77,8 +86,9 @@ export function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, 
   const hasMore = displayCount < sortedCustomers.length;
 
   return (
-    <div className="px-2 pb-2">
-      <div className="flex items-center justify-between mb-1 py-0.5">
+    <div className="h-[70vh] flex flex-col px-2 pb-2">
+      {/* 头部控制区域 */}
+      <div className="flex-shrink-0 flex items-center justify-between mb-1 py-0.5">
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-slate-500">显示 {displayedCustomers.length}/{sortedCustomers.length} 位</span>
           <button
@@ -102,39 +112,45 @@ export function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, 
         </button>
       </div>
 
-      {viewMode === 'card' ? (
-        <div className="space-y-1.5">
-          {displayedCustomers.map((customer, index) => (
-            <CustomerListItem
-              key={customer.id}
-              customer={customer}
-              index={index}
+      {/* 可滚动的内容区域 */}
+      <div className="flex-1 overflow-y-auto">
+        {viewMode === 'card' ? (
+          <div className="space-y-1.5">
+            {displayedCustomers.map((customer, index) => (
+              <CustomerListItem
+                key={customer.id}
+                customer={customer}
+                index={index}
+                onCustomerClick={onCustomerClick}
+                onEdit={onEdit}
+                onAddRecord={onAddRecord}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col">
+            <CustomerTable
+              customers={displayedCustomers}
               onCustomerClick={onCustomerClick}
-              onEdit={onEdit}
-              onAddRecord={onAddRecord}
+              onQuickUpdate={onQuickUpdate}
             />
-          ))}
-        </div>
-      ) : (
-        <CustomerTable
-          customers={displayedCustomers}
-          onCustomerClick={onCustomerClick}
-          onQuickUpdate={onQuickUpdate}
-        />
-      )}
+          </div>
+        )}
+      </div>
 
+      {/* 固定在底部的按钮区域 */}
       {hasMore && (
-        <div className="mt-2 flex justify-center">
+        <div className="flex-shrink-0 px-2 py-1  flex justify-center">
           <button
             onClick={handleShowMore}
-            className="px-3 py-1 bg-white border border-slate-200 rounded text-[10px] text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-colors"
+            className="px-3 py-1 text-[10px] text-slate-600 hover:text-blue-600 underline decoration-blue-600 underline-offset-2 hover:border-blue-300 transition-colors"
           >
             查看更多 +{Math.min(DEFAULT_PAGE_SIZE, sortedCustomers.length - displayCount)}
           </button>
           {sortedCustomers.length - displayCount > DEFAULT_PAGE_SIZE && (
             <button
               onClick={handleShowAll}
-              className="ml-2 px-2 py-1 text-[10px] text-slate-500 hover:text-blue-600 transition-colors"
+              className="ml-2 px-2 py-1 text-[10px] text-slate-500 hover:text-blue-600 underline decoration-blue-600 underline-offset-2 transition-colors"
             >
               全部
             </button>
@@ -144,3 +160,15 @@ export function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, 
     </div>
   );
 }
+
+// 使用 memo 避免不必要的重新渲染，并导出
+const MemoizedCustomerList = memo(CustomerList, (prevProps, nextProps) => {
+  // 只在关键数据变化时才重新渲染
+  return (
+    prevProps.customers === nextProps.customers &&
+    prevProps.onCustomerClick === nextProps.onCustomerClick &&
+    prevProps.onQuickUpdate === nextProps.onQuickUpdate
+  );
+});
+
+export { MemoizedCustomerList as CustomerList };

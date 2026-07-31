@@ -70,9 +70,17 @@ export function CustomerDetailModal({ customerId, onClose, onUpdate }: CustomerD
   const handleRecordSaved = async (updatedCustomer?: Customer) => {
     setRecordFormOpen(false);
     if (updatedCustomer && customer?.id) {
-      // 直接更新数据和缓存，不重新加载
+      // 更新客户信息
       setCustomer(updatedCustomer);
-      saveCustomerCache(customer.id, updatedCustomer, records);
+
+      // 重新加载跟进记录列表，显示新添加的记录
+      const recordRes = await fetchFollowUpRecords(customer.id);
+      setRecords(recordRes);
+
+      // 更新缓存
+      saveCustomerCache(customer.id, updatedCustomer, recordRes);
+
+      // 只更新列表中的这一条数据，不刷新整个列表
       onUpdate?.(updatedCustomer);
     } else if (customer?.id) {
       // 如果没有返回更新的客户信息，则重新加载
