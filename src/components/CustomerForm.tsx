@@ -8,7 +8,7 @@ interface CustomerFormProps {
   onSaved: (updatedCustomer?: Customer) => void;
 }
 
-const FOLLOW_UP_STATUSES = ['重点跟踪', '已约', '跟进中', '暂时先不跟', '已放弃'];
+const FOLLOW_UP_STATUSES = ['重点跟踪', '已约', '跟进中', '暂时不跟', '已放弃'];
 const CUSTOMER_STATUSES = ['潜在', '意向', '成交'];
 
 // 获取今天的日期（YYYY-MM-DD）
