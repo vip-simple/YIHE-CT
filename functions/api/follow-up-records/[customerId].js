@@ -23,6 +23,12 @@ export async function onRequestPost(context) {
     const body = await parseRequestBody(context.request);
     if (!body) return jsonResponse({ error: 'Invalid body' }, 400);
 
+    // 以数据库为准查询客户编号，避免请求体未传 customerNumber 时写成 0
+    const customerRow = await DB.prepare(
+      'SELECT customer_number FROM customers WHERE id = ?'
+    ).bind(customerId).first();
+    const customerNumber = customerRow ? Number(customerRow.customer_number) || 0 : 0;
+
     // 自动计算该客户的下一个跟进编号（从 1 开始）
     const maxRow = await DB.prepare(
       'SELECT MAX(record_number) AS max_no FROM follow_up_records WHERE customer_id = ?'
@@ -36,7 +42,7 @@ export async function onRequestPost(context) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       customerId,
-      Number(body.customerNumber) || 0,
+      customerNumber,
       nextNumber,
       body.followUpTime || '',
       body.followUpContent || '',

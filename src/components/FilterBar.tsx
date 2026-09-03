@@ -4,9 +4,10 @@ interface FilterBarProps {
   filter: FilterOptions;
   onFilterChange: (filter: FilterOptions) => void;
   statuses: string[];
+  customerStatuses: string[];
 }
 
-export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) {
+export function FilterBar({ filter, onFilterChange, statuses, customerStatuses }: FilterBarProps) {
   const toggleStatus = (status: string) => {
     const current = filter.selectedStatuses;
     if (current.includes(status)) {
@@ -18,6 +19,19 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
 
   const clearAllStatuses = () => {
     onFilterChange({ ...filter, selectedStatuses: [] });
+  };
+
+  const toggleCustomerStatus = (status: string) => {
+    const current = filter.selectedCustomerStatuses;
+    if (current.includes(status)) {
+      onFilterChange({ ...filter, selectedCustomerStatuses: current.filter((s) => s !== status) });
+    } else {
+      onFilterChange({ ...filter, selectedCustomerStatuses: [...current, status] });
+    }
+  };
+
+  const clearAllCustomerStatuses = () => {
+    onFilterChange({ ...filter, selectedCustomerStatuses: [] });
   };
 
   return (
@@ -54,6 +68,30 @@ export function FilterBar({ filter, onFilterChange, statuses }: FilterBarProps) 
         {filter.selectedStatuses.length > 0 && (
           <button
             onClick={clearAllStatuses}
+            className="px-2 py-0.5 rounded text-[10px] bg-red-100 text-red-600 hover:bg-red-200"
+          >
+            清除
+          </button>
+        )}
+      </div>
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <span className="text-[10px] text-slate-500 font-medium">客户：</span>
+        {customerStatuses.map((status) => (
+          <button
+            key={status}
+            onClick={() => toggleCustomerStatus(status)}
+            className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              filter.selectedCustomerStatuses.includes(status)
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            {status}
+          </button>
+        ))}
+        {filter.selectedCustomerStatuses.length > 0 && (
+          <button
+            onClick={clearAllCustomerStatuses}
             className="px-2 py-0.5 rounded text-[10px] bg-red-100 text-red-600 hover:bg-red-200"
           >
             清除

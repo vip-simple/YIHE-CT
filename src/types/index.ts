@@ -36,6 +36,7 @@ export interface FollowUpRecord {
 export interface FilterOptions {
   searchName: string;
   selectedStatuses: string[];
+  selectedCustomerStatuses: string[];
   dateRange: { start: string; end: string };
   enableDateFilter: boolean;
   hasAttentionItems: boolean;

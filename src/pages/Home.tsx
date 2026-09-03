@@ -13,18 +13,23 @@ const FILTER_STORAGE_KEY = 'yihe_filter';
 
 // 从 sessionStorage 读取筛选条件，没有则用默认值
 function loadInitialFilter(): FilterOptions {
-  try {
-    const saved = sessionStorage.getItem(FILTER_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return {
+  const defaultFilter: FilterOptions = {
     searchName: '',
     selectedStatuses: [],
+    selectedCustomerStatuses: [],
     dateRange: getThisWeekRange(),
     enableDateFilter: false, // 默认不启用日期筛选，显示所有客户
     hasAttentionItems: false,
     showOnlyWithAttention: false,
   };
+  try {
+    const saved = sessionStorage.getItem(FILTER_STORAGE_KEY);
+    // 与默认值合并，兼容旧版本存储中缺少的字段
+    if (saved) return { ...defaultFilter, ...JSON.parse(saved) };
+  } catch {
+    // 解析失败时使用默认筛选条件
+  }
+  return defaultFilter;
 }
 
 export function Home() {
@@ -44,7 +49,9 @@ export function Home() {
   useEffect(() => {
     try {
       sessionStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filter));
-    } catch {}
+    } catch {
+      // 存储失败时忽略，不影响正常使用
+    }
   }, [filter]);
 
   const loadCustomers = async () => {
@@ -195,6 +202,7 @@ export function Home() {
   }, []);
 
   const statuses = ['重点跟踪', '已约', '跟进中', '暂时不跟', '已放弃'];
+  const customerStatuses = ['潜在', '意向', '成交'];
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -210,6 +218,9 @@ export function Home() {
         }
       }
       if (filter.selectedStatuses.length > 0 && !filter.selectedStatuses.includes(customer.followUpStatus)) {
+        return false;
+      }
+      if (filter.selectedCustomerStatuses.length > 0 && !filter.selectedCustomerStatuses.includes(customer.customerStatus)) {
         return false;
       }
       if (filter.showOnlyWithAttention) {
@@ -232,7 +243,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <FilterBar filter={filter} onFilterChange={setFilter} statuses={statuses} />
+      <FilterBar filter={filter} onFilterChange={setFilter} statuses={statuses} customerStatuses={customerStatuses} />
       <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-500 bg-white border-b border-slate-100">
         <span>共 <span className="font-semibold text-slate-700">{filteredCustomers.length}</span> 位</span>
         <div className="flex items-center gap-2">

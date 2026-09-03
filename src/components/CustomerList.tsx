@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, memo } from 'react';
 import type { Customer } from '@/types';
 import { CustomerListItem } from './CustomerListItem';
 import { CustomerTable } from './CustomerTable';
@@ -11,26 +11,10 @@ interface CustomerListProps {
   onQuickUpdate?: (customerId: string, updates: Partial<Customer>) => void;
 }
 
-const DEFAULT_PAGE_SIZE = 20; // 默认显示数量
-
 function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuickUpdate }: CustomerListProps) {
   // console.log('CustomerList rendered, onCustomerClick:', typeof onCustomerClick);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [displayCount, setDisplayCount] = useState(DEFAULT_PAGE_SIZE);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
-
-  // 当客户列表长度发生重大变化时（如重新加载），才重置显示数量
-  const prevLengthRef = useRef<number>(0);
-  useEffect(() => {
-    const currentLength = customers.length;
-    const prevLength = prevLengthRef.current;
-
-    // 只有当列表长度完全不同时（比如从0到有数据，或数据量完全变化），才重置
-    if (prevLength === 0 || Math.abs(currentLength - prevLength) > 10) {
-      setDisplayCount(DEFAULT_PAGE_SIZE);
-    }
-    prevLengthRef.current = currentLength;
-  }, [customers.length]);
 
   if (customers.length === 0) {
     return (
@@ -74,23 +58,11 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleShowMore = () => {
-    setDisplayCount((prev) => prev + DEFAULT_PAGE_SIZE);
-  };
-
-  const handleShowAll = () => {
-    setDisplayCount(sortedCustomers.length);
-  };
-
-  const displayedCustomers = sortedCustomers.slice(0, displayCount);
-  const hasMore = displayCount < sortedCustomers.length;
-
   return (
     <div className="h-[85vh] flex flex-col px-2 pb-2">
       {/* 头部控制区域 */}
       <div className="flex-shrink-0 flex items-center justify-between mb-1 py-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500">显示 {displayedCustomers.length}/{sortedCustomers.length} 位</span>
           <button
             onClick={() => setViewMode(viewMode === 'card' ? 'table' : 'card')}
             className="text-[10px] text-blue-600 hover:text-blue-800"
@@ -116,7 +88,7 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
       <div className="flex-1 overflow-y-auto">
         {viewMode === 'card' ? (
           <div className="space-y-1.5">
-            {displayedCustomers.map((customer, index) => (
+            {sortedCustomers.map((customer, index) => (
               <CustomerListItem
                 key={customer.id}
                 customer={customer}
@@ -130,33 +102,13 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
         ) : (
           <div className="h-full flex flex-col">
             <CustomerTable
-              customers={displayedCustomers}
+              customers={sortedCustomers}
               onCustomerClick={onCustomerClick}
               onQuickUpdate={onQuickUpdate}
             />
           </div>
         )}
       </div>
-
-      {/* 固定在底部的按钮区域 */}
-      {hasMore && (
-        <div className="flex-shrink-0 px-2 py-1  flex justify-center">
-          <button
-            onClick={handleShowMore}
-            className="px-3 py-1 text-[10px] text-slate-600 hover:text-blue-600 underline decoration-blue-600 underline-offset-2 hover:border-blue-300 transition-colors"
-          >
-            查看更多 +{Math.min(DEFAULT_PAGE_SIZE, sortedCustomers.length - displayCount)}
-          </button>
-          {sortedCustomers.length - displayCount > DEFAULT_PAGE_SIZE && (
-            <button
-              onClick={handleShowAll}
-              className="ml-2 px-2 py-1 text-[10px] text-slate-500 hover:text-blue-600 underline decoration-blue-600 underline-offset-2 transition-colors"
-            >
-              全部
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }
