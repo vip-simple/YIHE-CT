@@ -13,6 +13,7 @@ interface CustomerListProps {
 
 function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuickUpdate }: CustomerListProps) {
   // console.log('CustomerList rendered, onCustomerClick:', typeof onCustomerClick);
+  const [sortField, setSortField] = useState<'name' | 'lastFollowUpTime'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
 
@@ -30,7 +31,23 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
     );
   }
 
+  // 解析时间字符串，无法解析的按 0 处理
+  const parseTime = (value: string) => {
+    if (!value) return 0;
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+
   const sortedCustomers = [...customers].sort((a, b) => {
+    if (sortField === 'lastFollowUpTime') {
+      // 最近沟通时间排序，无沟通时间的始终排在最后
+      const timeA = parseTime(a.lastFollowUpTime);
+      const timeB = parseTime(b.lastFollowUpTime);
+      if (!timeA && !timeB) return 0;
+      if (!timeA) return 1;
+      if (!timeB) return -1;
+      return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
+    }
     const nameA = a.name.trim();
     const nameB = b.name.trim();
 
@@ -50,13 +67,10 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
     return nameA.localeCompare(nameB, 'zh-Hans-CN', { usage: 'sort' });
   });
 
-  if (sortOrder === 'desc') {
+  // 姓名排序降序时整体反转（保持原有行为）
+  if (sortField === 'name' && sortOrder === 'desc') {
     sortedCustomers.reverse();
   }
-
-  const toggleSort = () => {
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  };
 
   return (
     <div className="h-[85vh] flex flex-col px-2 pb-2">
@@ -70,18 +84,49 @@ function CustomerList({ customers, onEdit, onAddRecord, onCustomerClick, onQuick
             {viewMode === 'card' ? '表格' : '卡片'}
           </button>
         </div>
-        <button
-          onClick={toggleSort}
-          className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-700 transition-colors"
-        >
-          <span>排序</span>
-          <svg className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-          </svg>
-          <svg className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setSortField('name')}
+            className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              sortField === 'name'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            姓名排序
+          </button>
+          <button
+            onClick={() => setSortField('lastFollowUpTime')}
+            className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              sortField === 'lastFollowUpTime'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            最近沟通时间排序
+          </button>
+          <span className="text-slate-300 mx-0.5">|</span>
+          <button
+            onClick={() => setSortOrder('asc')}
+            className={`px-1 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              sortOrder === 'asc'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            升序
+          </button>
+          <button
+            onClick={() => setSortOrder('desc')}
+            className={`px-1 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              sortOrder === 'desc'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            降序
+          </button>
+        </div>
       </div>
 
       {/* 可滚动的内容区域 */}
